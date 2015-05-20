@@ -20,7 +20,9 @@ cd ..\
 imshow(img);
 
 %% Add Input control of quality
-
+%
+%
+%
 %% Analysing Image
 % Test bwboundaries function to find boundaries of croped image to get
 % cropped image use imcrop function.
@@ -46,9 +48,14 @@ bw_fill = imfill(bw,'holes');
 % cc = bwconncomp(bw_fill,4);
 % cc.NumObjects
 
-% Find cells with |imfindcircles| parameter where chossen by testing
-[centers, radii] = imfindcircles(bw_fill,[10,25],'ObjectPolarity','bright','Sensitivity',0.8);
-circ_h = viscircles(centers, radii,'EdgeColor','b');
+if verLessThan('matlab','8.3.0.532')
+    [accum, circen, cirrad] = CircularHough_Grd(bw_fill,[10,25]);
+    circ_h = viscircles(circen,cirrad,'EdgeColor','b');
+else
+    % Find cells with |imfindcircles| parameter where chossen by testing
+    [centers, radii] = imfindcircles(bw_fill,[10,25],'ObjectPolarity','bright','Sensitivity',0.8);
+    circ_h = viscircles(centers, radii,'EdgeColor','b');
+end
 title(['Number of detected cells: ' num2str(max(size(centers)))])
 
 %% check if white blood cells where counted aswell
