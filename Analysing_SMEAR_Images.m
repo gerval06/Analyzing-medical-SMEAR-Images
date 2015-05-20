@@ -9,8 +9,8 @@ close all hidden
 %% Loading and showing data
 
 cd .\Data
-[Filename,~,FilterIndex] = uigetfile({'*.mat';'*.jpg'},'Select File');
-if(FilterIndex == 1)
+[Filename,~,FilterIndex] = uigetfile({'*.mat';'*.jpg';'*.bmp'},'Select File');
+if((FilterIndex == 1) || (FilterIndex == 3))
     img = importdata(Filename);
 elseif(FilterIndex == 2)
     img = imread(Filename);
@@ -22,12 +22,12 @@ imshow(img);
 %% Add Input control of quality
 %
 
-redHist = imhist(img(:,:,1));
-redHistMean = mean(redHist);
-if (redHistMean < (1.0594E+03 - (2*706.2978))) || (redHistMean > (1.0594E+03 - (2*706.2978)))
-    boxH = msgbox('Quality of Picture is to low. Program stops !','Error','error');
-    return
-end
+% redHist = imhist(img(:,:,1));
+% redHistMean = mean(redHist);
+% if (redHistMean < (1.0594E+03 - (706.2978))) || (redHistMean > (1.0594E+03 - (706.2978)))
+%     boxH = msgbox('Quality of Picture is to low. Program stops !','Error','error');
+%     return
+% end
 %% Analysing Image
 % Test bwboundaries function to find boundaries of croped image to get
 % cropped image use imcrop function.
@@ -47,20 +47,16 @@ img_adjust2 = img_adjust - background;
 level = graythresh(img_adjust2);
 bw = im2bw(img_adjust2,level);
 bw_fill = imfill(bw,'holes');
-%imshow(bw_fill)
 
 % Test algorithm with |bwconncomp|
 % cc = bwconncomp(bw_fill,4);
 % cc.NumObjects
-
+RadMin = 10;
+RadMax = 25;
 if verLessThan('matlab','8.3.0.532')
-    [accum, circen, cirrad] = CircularHough_Grd(bw_fill,[10,25]);
-    circ_h = viscircles(circen,cirrad,'EdgeColor','b');
+    [CircleCenter, CircleRad] = CountCircles(img_adjust, RadMin, RadMax);
 else
-    % Find cells with |imfindcircles| parameter where chossen by testing
-    [centers, radii] = imfindcircles(bw_fill,[10,25],'ObjectPolarity','bright','Sensitivity',0.8);
-    circ_h = viscircles(centers, radii,'EdgeColor','b');
+    [CircleCenter, CircleRad] = CountCircles(bw_fill, RadMin, RadMax);
 end
-title(['Number of detected cells: ' num2str(max(size(centers)))])
-
+circ_h = viscircles(CircleCenter, CircleRad,'EdgeColor','b');
 %% check if white blood cells where counted aswell
