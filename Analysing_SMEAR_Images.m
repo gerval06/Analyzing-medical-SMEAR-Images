@@ -21,8 +21,13 @@ imshow(img);
 
 %% Add Input control of quality
 %
-%
-%
+
+redHist = imhist(img(:,:,1));
+redHistMean = mean(redHist);
+if (redHistMean < (1.0594E+03 - (2*706.2978))) || (redHistMean > (1.0594E+03 - (2*706.2978)))
+    boxH = msgbox('Quality of Picture is to low. Program stops !','Error','error');
+    return
+end
 %% Analysing Image
 % Test bwboundaries function to find boundaries of croped image to get
 % cropped image use imcrop function.
